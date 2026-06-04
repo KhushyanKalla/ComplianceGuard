@@ -1,0 +1,1 @@
+web: gunicorn compliance_main.wsgi
