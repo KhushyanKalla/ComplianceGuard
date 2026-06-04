@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<style>
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes barFill {
+    from { width: 0%; }
+}
+.card-enter {
+    animation: fadeUp 0.4s ease both;
+}
+.risk-bar {
+    animation: barFill 0.8s ease both;
+    animation-delay: 0.3s;
+}
+</style>
+
+<!-- Stats bar -->
+<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-bottom:2rem;">
+
+    <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:1rem 1.25rem;">
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 6px; text-transform:uppercase; letter-spacing:0.05em;">Total Analyzed</p>
+        <p style="font-size:28px; font-weight:600; color:#f1f5f9; margin:0; font-family:'IBM Plex Mono',monospace;">{{ contracts|length }}</p>
+    </div>
+
+    <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:1rem 1.25rem;">
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 6px; text-transform:uppercase; letter-spacing:0.05em;">Avg Risk Score</p>
+        <p style="font-size:28px; font-weight:600; color:#f1f5f9; margin:0; font-family:'IBM Plex Mono',monospace;">
+            {% if contracts %}
+                {% with total=0 %}
+                    {{ contracts|length }}
+                {% endwith %}
+                --
+            {% else %}
+                --
+            {% endif %}
+        </p>
+    </div>
+
+    <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:1rem 1.25rem;">
+        <p style="font-size:12px; color:#94a3b8; margin:0 0 6px; text-transform:uppercase; letter-spacing:0.05em;">High Risk</p>
+        <p style="font-size:28px; font-weight:600; color:#f87171; margin:0; font-family:'IBM Plex Mono',monospace;">
+            {% for c in contracts %}{% if c.risk_score > 70 %}!{% endif %}{% endfor %}
+        </p>
+    </div>
+
+</div>
+
+<!-- Page heading row -->
+<div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+    <div>
+        <h1 style="font-size:20px; font-weight:600; color:#f1f5f9; margin:0;">Audited Contracts</h1>
+        <p style="font-size:13px; color:#64748b; margin:4px 0 0;">AI-analyzed legal documents</p>
+    </div>
+    <a href="{% url 'upload-contract' %}"
+       style="background:#2563eb; color:#fff; font-size:13px; font-weight:600; padding:8px 16px; border-radius:8px; text-decoration:none; transition:background 0.2s;"
+       onmouseover="this.style.background='#1d4ed8'" onmouseout="this.style.background='#2563eb'">
+        + Upload New
+    </a>
+</div>
+
+<!-- Cards grid -->
+<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap:16px;">
+
+    {% for contract in contracts %}
+
+    <div class="card-enter"
+         style="background:#1e293b; border:1px solid #334155; border-radius:12px; padding:1.25rem;
+                animation-delay: {{ forloop.counter0 }}00ms; transition: border-color 0.2s;"
+         onmouseover="this.style.borderColor='#475569'" onmouseout="this.style.borderColor='#334155'">
+
+        <!-- Card top row: vendor name + badge -->
+        <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:14px;">
+
+            <div>
+                <p style="font-size:15px; font-weight:600; color:#f1f5f9; margin:0;">{{ contract.vendor_name }}</p>
+                <p style="font-size:12px; color:#64748b; margin:4px 0 0;">{{ contract.upload_at }}</p>
+            </div>
+
+            {% if contract.risk_score > 70 %}
+                <span style="background:#450a0a; color:#f87171; border:1px solid #7f1d1d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; white-space:nowrap;">
+                    HIGH RISK
+                </span>
+            {% elif contract.risk_score > 40 %}
+                <span style="background:#431407; color:#fb923c; border:1px solid #7c2d12; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; white-space:nowrap;">
+                    MEDIUM
+                </span>
+            {% else %}
+                <span style="background:#052e16; color:#4ade80; border:1px solid #14532d; font-size:11px; font-weight:700; padding:3px 10px; border-radius:99px; white-space:nowrap;">
+                    LOW RISK
+                </span>
+            {% endif %}
+
+        </div>
+
+        <!-- Risk score + progress bar -->
+        <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="font-size:12px; color:#94a3b8;">Risk Score</span>
+                <span style="font-size:13px; font-weight:600; color:#f1f5f9; font-family:'IBM Plex Mono',monospace;">{{ contract.risk_score }}%</span>
+            </div>
+
+            <!-- Progress bar track -->
+            <div style="background:#0f172a; border-radius:99px; height:6px; overflow:hidden;">
+                {% if contract.risk_score > 70 %}
+                    <div class="risk-bar" style="height:100%; border-radius:99px; background:#ef4444; width:{{ contract.risk_score }}%;"></div>
+                {% elif contract.risk_score > 40 %}
+                    <div class="risk-bar" style="height:100%; border-radius:99px; background:#f97316; width:{{ contract.risk_score }}%;"></div>
+                {% else %}
+                    <div class="risk-bar" style="height:100%; border-radius:99px; background:#22c55e; width:{{ contract.risk_score }}%;"></div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- AI summary snippet -->
+        <p style="font-size:12px; color:#64748b; margin:0; line-height:1.6; border-top:1px solid #1e3a5f; padding-top:12px;">
+            {{ contract.ai_summary|truncatechars:140 }}
+        </p>
+
+    </div>
+
+    {% empty %}
+
+    <!-- Empty state -->
+    <div style="grid-column:1/-1; text-align:center; padding:4rem 0; color:#334155;">
+        <p style="font-size:14px; margin:0 0 12px;">No contracts analyzed yet.</p>
+        <a href="{% url 'upload-contract' %}" style="color:#3b82f6; font-size:13px; text-decoration:none;">Upload your first contract →</a>
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock content %}

@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Page heading -->
+<div class="mb-8">
+    <h1 class="text-2xl font-semibold text-white">Upload Contract</h1>
+    <p class="text-gray-500 text-sm mt-1">PDF only. Gemini AI will analyze risk clauses and score the contract.</p>
+</div>
+
+<!-- Error message — only shows if views.py sends an 'error' key -->
+{% if error %}
+<div class="mb-6 bg-red-950 border border-red-800 text-red-400 text-sm px-4 py-3 rounded-lg">
+    ⚠ {{ error }}
+</div>
+{% endif %}
+
+<!-- Upload form card -->
+<div class="bg-gray-900 border border-gray-800 rounded-xl p-8 max-w-lg">
+
+    <form method="POST" enctype="multipart/form-data" class="space-y-6">
+        {% csrf_token %}
+
+        <!-- Vendor name input -->
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+                Vendor / Company Name
+            </label>
+            <input
+                type="text"
+                name="vendor_name"
+                placeholder="e.g. Acme Corp"
+                required
+                class="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-2.5 text-white text-sm placeholder-gray-600 focus:outline-none focus:border-blue-500 transition-colors"
+            >
+        </div>
+
+        <!-- PDF file input -->
+        <div>
+            <label class="block text-sm font-medium text-gray-300 mb-2">
+                Contract File <span class="text-gray-600 font-normal">(PDF only)</span>
+            </label>
+            <input
+                type="file"
+                name="contract_pdf"
+                accept=".pdf"
+                required
+                class="w-full bg-gray-950 border border-gray-700 rounded-lg px-4 py-2.5 text-sm text-gray-400
+                       file:mr-4 file:py-1 file:px-3 file:rounded file:border-0
+                       file:text-xs file:font-semibold file:bg-blue-600 file:text-white
+                       hover:file:bg-blue-500 file:cursor-pointer transition-colors"
+            >
+        </div>
+
+        <!-- Submit button -->
+        <button
+            type="submit"
+            class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-4 rounded-lg text-sm transition-colors duration-200"
+        >
+            Analyze with Gemini AI →
+        </button>
+
+    </form>
+</div>
+
+{% endblock content %}
