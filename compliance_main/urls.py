@@ -17,10 +17,12 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from auditor.views import ContractUploadView,DashboardView
+from django.views.generic import RedirectView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     
     path("upload/", ContractUploadView.as_view(), name="upload-contract"),
     path('dashboard/', DashboardView.as_view(), name='contract-dashboard'),
+    path('', RedirectView.as_view(url='/upload/'))
 ]
